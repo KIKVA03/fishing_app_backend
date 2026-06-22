@@ -1,0 +1,82 @@
+// Prisma schema for the FishMap Georgia backend.
+// Docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  // Supabase: pooled connection (PgBouncer, port 6543) for the running app.
+  url       = env("DATABASE_URL")
+  // Supabase: direct connection (port 5432) used by `prisma migrate`.
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  email        String   @unique
+  password     String // bcrypt hash — never returned to clients
+  avatar       String   @default("🎣") // emoji string, e.g. "🎣"
+  totalCatches Int      @default(0) @map("total_catches")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  catches  Catch[]
+  comments Comment[]
+
+  @@map("users")
+}
+
+model Lake {
+  id              Int     @id // matches the ids used by the app's lakesData.json
+  nameKa          String  @map("name_ka")
+  nameEn          String  @map("name_en")
+  type            String // 'lake' | 'reservoir' | 'river'
+  region          String
+  latitude        Float
+  longitude       Float
+  areaKm2         Float?  @map("area_km2")
+  maxDepthMeters  Float?  @map("max_depth_meters")
+  description     String?
+  // Array of { name_ka, name_en?, preferred_depth_meters } stored as JSON.
+  fishSpecies     Json    @map("fish_species")
+
+  catches  Catch[]
+  comments Comment[]
+
+  @@map("lakes")
+}
+
+model Catch {
+  id        String   @id @default(cuid())
+  imageUri  String   @map("image_uri")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  lakeId Int  @map("lake_id")
+  lake   Lake @relation(fields: [lakeId], references: [id], onDelete: Cascade)
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([lakeId])
+  @@index([userId])
+  @@map("catches")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  text      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  lakeId Int  @map("lake_id")
+  lake   Lake @relation(fields: [lakeId], references: [id], onDelete: Cascade)
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([lakeId])
+  @@index([userId])
+  @@map("comments")
+}

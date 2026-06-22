@@ -1,0 +1,23 @@
+# dependencies
+/node_modules
+
+# build output
+/dist
+
+# environment
+.env
+.env.local
+.env.*.local
+
+# uploaded user content (catch photos)
+/uploads/*
+!/uploads/.gitkeep
+
+# logs
+*.log
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+.idea
+.vscode

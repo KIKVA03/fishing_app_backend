@@ -1,0 +1,247 @@
+[
+    {
+        "id": 1,
+        "name_ka": "თბილისის ზღვა",
+        "name_en": "Tbilisi Sea",
+        "type": "reservoir",
+        "region": "Tbilisi",
+        "coordinates": { "latitude": 41.7461, "longitude": 44.8644 },
+        "description": "თბილისის წყალსაცავი, ყველაზე ხელმისაწვდომი ადგილი დედაქალაქთან ახლოს.",
+        "fish_species": [
+            { "name_ka": "კობრი", "preferred_depth_meters": 3.5 },
+            { "name_ka": "კარასი", "preferred_depth_meters": 1.5 },
+            { "name_ka": "ქორჭილა", "preferred_depth_meters": 2.0 },
+            { "name_ka": "ქარიყლაპია", "preferred_depth_meters": 2.0 },
+            { "name_ka": "შამაია", "preferred_depth_meters": 2.0 },
+            { "name_ka": "ლოქო", "preferred_depth_meters": 6.0 },
+            { "name_ka": "წვერა", "preferred_depth_meters": 2.0 }
+        ]
+    },
+    {
+        "id": 2,
+        "name_ka": "ჟინვალის წყალსაცავი",
+        "name_en": "Zhinvali Reservoir",
+        "type": "reservoir",
+        "region": "Mtskheta-Mtianeti",
+        "coordinates": { "latitude": 42.150915, "longitude": 44.768962 },
+        "description": "ღრმა და მთიანი წყალსაცავი, გამოირჩევა სუფთა წყლით და ლამაზი ხედებით.",
+        "fish_species": [
+            { "name_ka": "კალმახი", "preferred_depth_meters": 4.0 },
+            { "name_ka": "წვერა", "preferred_depth_meters": 2.5 },
+            { "name_ka": "ქაშაპი", "preferred_depth_meters": 1.8 }
+        ]
+    },
+    {
+        "id": 3,
+        "name_ka": "კუმისის ტბა",
+        "name_en": "Kumisi Lake",
+        "type": "lake",
+        "region": "Kvemo Kartli",
+        "coordinates": { "latitude": 41.5847, "longitude": 44.8392 },
+        "description": "არაღრმა, თბილი ტბა. ძალიან პოპულარული ადგილი ფსკერული თევზაობის მოყვარულთათვის.",
+        "fish_species": [
+            { "name_ka": "კობრი", "preferred_depth_meters": 2.0 },
+            { "name_ka": "კარასი", "preferred_depth_meters": 1.0 },
+            { "name_ka": "სქელშუბლა", "preferred_depth_meters": 1.5 }
+        ]
+    },
+    {
+        "id": 4,
+        "name_ka": "შაორის წყალსაცავი",
+        "name_en": "Shaori Reservoir",
+        "type": "reservoir",
+        "region": "Racha-Lechkhumi",
+        "coordinates": { "latitude": 42.420249, "longitude": 43.074028 },
+        "description": "ულამაზესი წყალსაცავი რაჭაში, გამოირჩევა ცივი წყლითა და უნიკალური ბუნებით.",
+        "fish_species": [
+            { "name_ka": "ქორჭილა", "preferred_depth_meters": 2.0 },
+            { "name_ka": "ქარიყლაპია", "preferred_depth_meters": 2.0 },
+            { "name_ka": "შამაია", "preferred_depth_meters": 2.0 },
+            { "name_ka": "კობრი", "preferred_depth_meters": 4.0 },
+            { "name_ka": "კალმახი", "preferred_depth_meters": 5.0 },
+            { "name_ka": "ამური", "preferred_depth_meters": 3.0 }
+        ]
+    },
+    {
+        "id": 5,
+        "name_ka": "სიონის წყალსაცავი",
+        "name_en": "Sioni Reservoir",
+        "type": "reservoir",
+        "region": "Mtskheta-Mtianeti",
+        "coordinates": { "latitude": 42.007385, "longitude": 44.996899 },
+        "description": "სიონის წყალსაცავი, საუკეთესო ადგილი როგორც დასასვენებლად, ისე სათევზაოდ.",
+        "fish_species": [
+            { "name_ka": "კარასი", "preferred_depth_meters": 2.0 },
+            { "name_ka": "კობრი", "preferred_depth_meters": 3.8 },
+            { "name_ka": "ხრამული", "preferred_depth_meters": 3.8 },
+            { "name_ka": "ქაშაპი", "preferred_depth_meters": 1.5 }
+        ]
+    },
+    {
+        "id": 6,
+        "name_ka": "პალიასტომის ტბა",
+        "name_en": "Paliastomi Lake",
+        "type": "lake",
+        "region": "Samegrelo-Zemo Svaneti",
+        "coordinates": { "latitude": 42.1192, "longitude": 41.7289 },
+        "description": "კოლხეთის ეროვნული პარკის ნაწილი. ტბა უერთდება შავ ზღვას, რის გამოც თევზების დიდი მრავალფეროვნებაა.",
+        "fish_species": [
+            { "name_ka": "ლოქო", "preferred_depth_meters": 4.5 },
+            { "name_ka": "კეფალი", "preferred_depth_meters": 1.2 },
+            { "name_ka": "კარასი", "preferred_depth_meters": 1.8 },
+            { "name_ka": "ჭანარი", "preferred_depth_meters": 3.0 }
+        ]
+    },
+    {
+        "id": 7,
+        "name_ka": "ბაზალეთის ტბა",
+        "name_en": "Bazaleti Lake",
+        "type": "lake",
+        "region": "Mtskheta-Mtianeti",
+        "coordinates": { "latitude": 42.0361, "longitude": 44.6783 },
+        "description": "ლეგენდებით მოცული ტბა დუშეთთან ახლოს, პოპულარული საკურორტო ზონა.",
+        "fish_species": [
+            { "name_ka": "კარასი", "preferred_depth_meters": 1.5 },
+            { "name_ka": "კობრი", "preferred_depth_meters": 3.8 },
+            { "name_ka": "ქორჭილა", "preferred_depth_meters": 2.0 },
+            { "name_ka": "ქარიყლაპია", "preferred_depth_meters": 2.0 },
+            { "name_ka": "ხრამული", "preferred_depth_meters": 3.8 }
+        ]
+    },
+    {
+        "id": 8,
+        "name_ka": "ფარავნის ტბა",
+        "name_en": "Paravani Lake",
+        "type": "lake",
+        "region": "Samtskhe-Javakheti",
+        "coordinates": { "latitude": 41.4489, "longitude": 43.8119 },
+        "description": "ფართობით ყველაზე დიდი ტბა საქართველოში, მდებარეობს ზღვის დონიდან საკმაოდ მაღლა. წყალი ცივია.",
+        "fish_species": [
+            {
+                "name_ka": "ფარავნის კარასი",
+                "name_en": "Crucian Carp",
+                "preferred_depth_meters": 2.0
+            },
+            { "name_ka": "კალმახი", "preferred_depth_meters": 4.0 },
+            { "name_ka": "რიპუსი", "preferred_depth_meters": 5.5 }
+        ]
+    },
+    {
+        "id": 9,
+        "name_ka": "ჯანდარის ტბა",
+        "name_en": "Jandari Lake",
+        "type": "lake",
+        "region": "Kvemo Kartli",
+        "coordinates": { "latitude": 41.4344, "longitude": 45.2153 },
+        "description": "საქართველოსა და აზერბაიჯანის საზღვარზე მდებარე ტბა, ცნობილია დიდი კარასებით.",
+        "fish_species": [
+            { "name_ka": "კარასი", "preferred_depth_meters": 1.2 },
+            { "name_ka": "კობრი", "preferred_depth_meters": 2.5 },
+            { "name_ka": "სქელშუბლა", "preferred_depth_meters": 1.8 }
+        ]
+    },
+    {
+        "id": 20,
+        "name_ka": "წალკის წყალსაცავი",
+        "name_en": "Walka Reservoir",
+        "type": "reservoir",
+        "region": "Kvemo Kartli",
+        "coordinates": { "latitude": 41.622461, "longitude": 44.062347 },
+        "description": "საქართველოსა და აზერბაიჯანის საზღვარზე მდებარე ტბა, ცნობილია დიდი კარასებით.",
+        "fish_species": [
+            { "name_ka": "კარასი", "preferred_depth_meters": 1.2 },
+            { "name_ka": "კობრი", "preferred_depth_meters": 2.5 },
+            { "name_ka": "ქორჭილა", "preferred_depth_meters": 2.0 },
+            { "name_ka": "ქარიყლაპია", "preferred_depth_meters": 2.0 }
+        ]
+    },
+    {
+        "id": 10,
+        "name_ka": "ალგეთის წყალსაცავი",
+        "name_en": "Algeti Reservoir",
+        "type": "reservoir",
+        "region": "Kvemo Kartli",
+        "coordinates": { "latitude": 41.588512, "longitude": 44.522906 },
+        "description": "მდებარეობს წალკის მუნიციპალიტეტში, ზღვის დონიდან 1506 მ სიმაღლეზე, მდინარე ხრამის ხეობაში.",
+        "fish_species": [
+            { "name_ka": "ქორჭილა", "preferred_depth_meters": 2.0 },
+            { "name_ka": "ქარიყლაპია", "preferred_depth_meters": 2.0 },
+            { "name_ka": "კობრი", "preferred_depth_meters": 3.0 },
+            { "name_ka": "კარასი", "preferred_depth_meters": 3.0 }
+        ]
+    },
+    {
+        "id": 11,
+        "name_ka": "ტაბაწყურის ტბა",
+        "name_en": "Tabatskuri Lake",
+        "type": "lake",
+        "region": "Samtskhe-Javakheti",
+        "coordinates": { "latitude": 41.6517, "longitude": 43.6264 },
+        "description": "მთის უმშვენიერესი და ძალიან ღრმა ტბა ბორჯომისა და ახალქალაქის საზღვარზე.",
+        "fish_species": [
+            { "name_ka": "კალმახი", "preferred_depth_meters": 6.0 },
+            { "name_ka": "რიპუსი", "preferred_depth_meters": 8.0 },
+            { "name_ka": "სიგი", "preferred_depth_meters": 7.0 }
+        ]
+    },
+
+    {
+        "id": 13,
+        "name_ka": "ლოპოტას ტბა",
+        "name_en": "Lopota Lake",
+        "type": "lake",
+        "region": "Kakheti",
+        "coordinates": { "latitude": 42.055896, "longitude": 45.5255 },
+        "description": "კახეთში მდებარე ტბა, რომელიც მოქცეულია კერძო საკურორტო ზონაში, თუმცა საინტერესოა თევზჭერის მხრივ.",
+        "fish_species": [
+            { "name_ka": "კობრი", "preferred_depth_meters": 3.0 },
+            { "name_ka": "ამური", "preferred_depth_meters": 2.5 },
+            { "name_ka": "სქელშუბლა", "preferred_depth_meters": 2.0 }
+        ]
+    },
+
+    {
+        "id": 15,
+        "name_ka": "ინკიტის ტბა",
+        "name_en": "Inkiti Lake",
+        "type": "lake",
+        "region": "Abkhazia",
+        "coordinates": { "latitude": 43.1603, "longitude": 40.2789 },
+        "description": "მდებარეობს ბიჭვინთის კონცხზე. პატარა, რელიქტური ტბა მდიდარი ფაუნით.",
+        "fish_species": [
+            { "name_ka": "კარასი", "preferred_depth_meters": 1.0 },
+            { "name_ka": "კობრი", "preferred_depth_meters": 2.0 },
+            { "name_ka": "ქარიყლაპია", "preferred_depth_meters": 1.5 }
+        ]
+    },
+
+    {
+        "id": 18,
+        "name_ka": "გრემისხევის წყალსაცავი",
+        "name_en": "Gremiskhevi Reservoir",
+        "type": "reservoir",
+        "region": "Mtskheta-Mtianeti",
+        "coordinates": { "latitude": 42.075432, "longitude": 44.567937 },
+        "description": "მდებარეობს დუშეთის მუნიციპალიტეტში. წყნარი და საინტერესო ადგილი სპინინგითა და ფიდერით თევზაობისთვის.",
+        "fish_species": [
+            { "name_ka": "კობრი", "preferred_depth_meters": 3.2 },
+            { "name_ka": "წვერა", "preferred_depth_meters": 1.8 },
+            { "name_ka": "ქაშაპი", "preferred_depth_meters": 1.2 }
+        ]
+    },
+
+    {
+        "id": 19,
+        "name_ka": "ტყიბბულის წყალსაცავი",
+        "name_en": "Tqibbuli Reservoir",
+        "type": "reservoir",
+        "region": "imereti",
+        "coordinates": { "latitude": 42.291319, "longitude": 42.942851 },
+        "description": "მდებარეობს ტყიბულის მუნიციპალიტეტში . ",
+        "fish_species": [
+            { "name_ka": "კობრი", "preferred_depth_meters": 3.2 },
+            { "name_ka": "წვერა", "preferred_depth_meters": 1.8 },
+            { "name_ka": "ქაშაპი", "preferred_depth_meters": 1.2 }
+        ]
+    }
+]
