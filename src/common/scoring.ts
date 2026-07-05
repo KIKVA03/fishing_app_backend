@@ -23,13 +23,15 @@ export const RANK_TIERS: RankTier[] = [
   },
 ];
 
-// score = catches×10 + full_months×5 + photos×15
+// score = catches×10 + full_months×5
+// Photos are gallery-only now — they no longer award points.
+// (To restore the old bonus, add back: ` + photoCount * 15`.)
 export function calculateUserScore(
   totalCatches: number,
   accountAgeDays: number,
-  photoCount: number,
+  _photoCount: number,
 ): number {
-  return totalCatches * 10 + Math.floor(accountAgeDays / 30) * 5 + photoCount * 15;
+  return totalCatches * 10 + Math.floor(accountAgeDays / 30) * 5;
 }
 
 export function getRankTier(score: number): RankTier {

@@ -38,10 +38,9 @@ export class UsersService {
     const ranked = users
       .map((user) => {
         const photoCount = user._count.catches;
-        // catches and photos are the same event in this app, so totalCatches tracks photoCount.
-        const totalCatches = Math.max(user.totalCatches, photoCount);
+        // Photos are gallery-only now — they don't add points or count as catches.
         const score = calculateUserScore(
-          totalCatches,
+          user.totalCatches,
           accountAgeDays(user.createdAt),
           photoCount,
         );
@@ -50,7 +49,7 @@ export class UsersService {
           id: user.id,
           username: user.username,
           avatar: user.avatar,
-          total_catches: totalCatches,
+          total_catches: user.totalCatches,
           score,
           tier: { emoji: tier.emoji, name: tier.name, color: tier.color },
         };

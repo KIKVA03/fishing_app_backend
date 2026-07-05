@@ -3,7 +3,8 @@ import { Lake } from '@prisma/client';
 export interface FishSpeciesDto {
   name_ka: string;
   name_en?: string;
-  preferred_depth_meters: number;
+  // How rare / hard to catch: 1 = common/easy … 5 = rare/hard.
+  catch_difficulty: number;
 }
 
 // Matches the app's `Lake` type (types/fishing.ts).

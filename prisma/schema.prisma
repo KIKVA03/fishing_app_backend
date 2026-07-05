@@ -29,6 +29,23 @@ model User {
   @@map("users")
 }
 
+// Holds a pending registration until the user proves they own the email by
+// entering the code we mailed them. No real User row exists until then, so fake
+// emails never become accounts. One row per email (re-requesting overwrites it).
+model EmailVerification {
+  email        String   @id
+  username     String
+  passwordHash String   @map("password_hash") // bcrypt hash of the chosen password
+  avatar       String // pre-picked avatar so the created user matches what we showed
+  codeHash     String   @map("code_hash") // bcrypt hash of the 6-digit code
+  attempts     Int      @default(0) // wrong-code tries (locks after a few)
+  expiresAt    DateTime @map("expires_at")
+  lastSentAt   DateTime @default(now()) @map("last_sent_at") // for resend cooldown
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("email_verifications")
+}
+
 model Lake {
   id              Int     @id // matches the ids used by the app's lakesData.json
   nameKa          String  @map("name_ka")
@@ -40,7 +57,7 @@ model Lake {
   areaKm2         Float?  @map("area_km2")
   maxDepthMeters  Float?  @map("max_depth_meters")
   description     String?
-  // Array of { name_ka, name_en?, preferred_depth_meters } stored as JSON.
+  // Array of { name_ka, name_en?, catch_difficulty } stored as JSON.
   fishSpecies     Json    @map("fish_species")
 
   catches  Catch[]

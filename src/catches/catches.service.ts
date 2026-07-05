@@ -17,6 +17,9 @@ const CATCH_INCLUDE = {
   user: { select: { username: true, avatar: true } },
 } as const;
 
+// Max photos a single user may upload per calendar day (server time).
+const DAILY_PHOTO_LIMIT = 3;
+
 @Injectable()
 export class CatchesService {
   constructor(
@@ -57,19 +60,28 @@ export class CatchesService {
       throw new NotFoundException('ტბა ვერ მოიძებნა');
     }
 
+    // Enforce the per-day upload cap (counts this user's photos since midnight).
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const todayCount = await this.prisma.catch.count({
+      where: { userId, createdAt: { gte: startOfDay } },
+    });
+    if (todayCount >= DAILY_PHOTO_LIMIT) {
+      this.removeFile(file.filename);
+      throw new BadRequestException(
+        `დღეში მაქსიმუმ ${DAILY_PHOTO_LIMIT} ფოტოს ატვირთვა შეიძლება. სცადე ხვალ 🎣`,
+      );
+    }
+
     const imageUri = this.buildImageUrl(file.filename);
 
-    // Create the catch and bump the owner's total in one transaction.
-    const [created] = await this.prisma.$transaction([
-      this.prisma.catch.create({
-        data: { userId, lakeId, imageUri },
-        include: CATCH_INCLUDE,
-      }),
-      this.prisma.user.update({
-        where: { id: userId },
-        data: { totalCatches: { increment: 1 } },
-      }),
-    ]);
+    // Photos are gallery-only now — they don't award points, so we no longer
+    // bump the user's total_catches here. (Re-add a user.update increment to
+    // make photos count again.)
+    const created = await this.prisma.catch.create({
+      data: { userId, lakeId, imageUri },
+      include: CATCH_INCLUDE,
+    });
 
     return toCatchPhoto(created);
   }
@@ -83,13 +95,9 @@ export class CatchesService {
       throw new ForbiddenException('მხოლოდ ავტორს შეუძლია ფოტოს წაშლა');
     }
 
-    await this.prisma.$transaction([
-      this.prisma.catch.delete({ where: { id: catchId } }),
-      this.prisma.user.update({
-        where: { id: userId },
-        data: { totalCatches: { decrement: 1 } },
-      }),
-    ]);
+    // Photos no longer count toward total_catches, so deleting one just removes
+    // the row (no user.update decrement needed anymore).
+    await this.prisma.catch.delete({ where: { id: catchId } });
 
     // Best-effort cleanup of the stored file.
     this.removeFile(this.filenameFromUrl(entry.imageUri));
