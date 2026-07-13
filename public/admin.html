@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>FishMap — ადმინ პანელი</title>
+<style>
+  :root {
+    --bg: #0f172a; --card: #1e293b; --border: rgba(45,212,191,.25);
+    --teal: #10b981; --teal2: #5eead4; --text: #f8fafc; --muted: #94a3b8;
+    --danger: #ef4444;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; min-height: 100vh; }
+  .grad { background: linear-gradient(135deg, #022c22 0%, #064e3b 35%, #0f766e 70%, #115e59 100%); }
+
+  /* ── login ── */
+  #login { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+  .login-card { width: 100%; max-width: 380px; background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 28px; }
+  .login-card h1 { font-size: 20px; text-align: center; margin-bottom: 4px; }
+  .login-card p { color: var(--muted); font-size: 13px; text-align: center; margin-bottom: 20px; }
+  .field { margin-bottom: 12px; }
+  .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; font-weight: 600; }
+  input, textarea, select { width: 100%; background: #0f172a; color: var(--text); border: 1px solid #334155; border-radius: 10px; padding: 11px 12px; font-size: 14px; font-family: inherit; }
+  input:focus, textarea:focus, select:focus { outline: none; border-color: var(--teal); }
+  .btn { display: inline-block; border: 0; border-radius: 999px; padding: 11px 20px; font-size: 14px; font-weight: 800; cursor: pointer; font-family: inherit; }
+  .btn-primary { background: var(--teal); color: #fff; width: 100%; }
+  .btn-danger { background: rgba(239,68,68,.15); color: #f87171; border: 1px solid rgba(239,68,68,.4); padding: 6px 12px; font-size: 12px; }
+  .btn-small { background: rgba(45,212,191,.15); color: var(--teal2); border: 1px solid var(--border); padding: 6px 12px; font-size: 12px; }
+  .err { color: #f87171; font-size: 13px; margin-top: 10px; text-align: center; min-height: 18px; }
+
+  /* ── app shell ── */
+  #app { display: none; }
+  header { padding: 14px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 5; }
+  header h1 { font-size: 16px; flex: 1; }
+  header button { background: rgba(255,255,255,.15); color: #fff; border: 0; border-radius: 999px; padding: 8px 14px; font-size: 12px; font-weight: 700; cursor: pointer; }
+  nav { display: flex; gap: 6px; padding: 12px 20px; flex-wrap: wrap; }
+  nav button { background: var(--card); color: var(--muted); border: 1px solid #334155; border-radius: 999px; padding: 9px 16px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; }
+  nav button.active { background: var(--teal); color: #fff; border-color: var(--teal); }
+  main { padding: 8px 20px 60px; max-width: 1100px; margin: 0 auto; }
+  h2 { font-size: 16px; margin: 18px 0 12px; }
+  .muted { color: var(--muted); font-size: 12px; }
+
+  /* ── dashboard ── */
+  .stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .stat { border: 1px solid var(--border); border-radius: 16px; padding: 16px; }
+  .stat .v { font-size: 24px; font-weight: 800; }
+  .stat .l { color: rgba(226,232,240,.85); font-size: 12px; margin-top: 4px; }
+
+  /* ── tables ── */
+  .tablewrap { overflow-x: auto; border: 1px solid #334155; border-radius: 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 640px; }
+  th { text-align: left; color: var(--muted); font-size: 11px; text-transform: uppercase; padding: 10px 12px; border-bottom: 1px solid #334155; }
+  td { padding: 10px 12px; border-bottom: 1px solid rgba(51,65,85,.5); vertical-align: middle; }
+  tr:last-child td { border-bottom: 0; }
+
+  /* ── photo grid ── */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; }
+  .photo { background: var(--card); border: 1px solid #334155; border-radius: 14px; overflow: hidden; }
+  .photo img { width: 100%; height: 130px; object-fit: cover; display: block; cursor: pointer; }
+  .photo .meta { padding: 8px 10px; font-size: 12px; }
+
+  /* ── comments ── */
+  .comment { background: var(--card); border: 1px solid #334155; border-radius: 14px; padding: 12px 14px; margin-bottom: 10px; }
+  .comment .head { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--teal2); font-weight: 700; margin-bottom: 6px; }
+  .comment .text { font-size: 14px; color: #e2e8f0; }
+  .comment .actions { text-align: right; margin-top: 8px; }
+
+  /* ── lake form ── */
+  .lakeform { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px; margin-bottom: 18px; display: none; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  textarea { min-height: 90px; font-family: ui-monospace, Consolas, monospace; font-size: 12px; }
+  #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--teal); color: #fff; padding: 12px 22px; border-radius: 999px; font-size: 14px; font-weight: 700; display: none; z-index: 50; }
+  #toast.error { background: var(--danger); }
+  @media (max-width: 600px) { .row2, .row3 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<!-- ═══ LOGIN ═══ -->
+<div id="login">
+  <div class="login-card">
+    <h1>🎣 FishMap ადმინი</h1>
+    <p>შედი ადმინის ანგარიშით</p>
+    <div class="field"><label>ელ-ფოსტა</label><input id="loginEmail" type="email" autocomplete="username"></div>
+    <div class="field"><label>პაროლი</label><input id="loginPass" type="password" autocomplete="current-password"></div>
+    <button class="btn btn-primary" onclick="doLogin()">შესვლა</button>
+    <div class="err" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- ═══ APP ═══ -->
+<div id="app">
+  <header class="grad">
+    <h1>🎣 FishMap — ადმინ პანელი</h1>
+    <span id="whoami" class="muted" style="color:rgba(255,255,255,.85)"></span>
+    <button onclick="logout()">გასვლა</button>
+  </header>
+  <nav>
+    <button data-tab="dash" class="active" onclick="show('dash')">📊 დაფა</button>
+    <button data-tab="lakes" onclick="show('lakes')">🗺️ ტბები</button>
+    <button data-tab="users" onclick="show('users')">👤 მომხმარებლები</button>
+    <button data-tab="photos" onclick="show('photos')">📸 ფოტოები</button>
+    <button data-tab="comments" onclick="show('comments')">💬 კომენტარები</button>
+  </nav>
+  <main>
+    <section id="tab-dash">
+      <h2>📊 სტატისტიკა</h2>
+      <div class="stats" id="statCards"></div>
+      <h2>🆕 ბოლო რეგისტრაციები</h2>
+      <div class="tablewrap"><table id="recentUsers"></table></div>
+    </section>
+
+    <section id="tab-lakes" style="display:none">
+      <h2>🗺️ ტბები <button class="btn btn-small" style="margin-left:8px" onclick="newLake()">+ ახალი ტბა</button></h2>
+      <div class="lakeform" id="lakeForm">
+        <h2 id="lakeFormTitle" style="margin-top:0">ტბის რედაქტირება</h2>
+        <div class="row3">
+          <div class="field"><label>ID</label><input id="lk_id" type="number"></div>
+          <div class="field"><label>ტიპი</label><select id="lk_type"><option value="lake">ტბა</option><option value="reservoir">წყალსაცავი</option><option value="river">მდინარე</option></select></div>
+          <div class="field"><label>რეგიონი</label><input id="lk_region"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>სახელი (ქართ.)</label><input id="lk_name_ka"></div>
+          <div class="field"><label>სახელი (ინგლ.)</label><input id="lk_name_en"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>განედი (lat)</label><input id="lk_lat" type="number" step="any"></div>
+          <div class="field"><label>გრძედი (lng)</label><input id="lk_lng" type="number" step="any"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>ფართობი კმ² (არასავალდ.)</label><input id="lk_area" type="number" step="any"></div>
+          <div class="field"><label>მაქს. სიღრმე მ (არასავალდ.)</label><input id="lk_depth" type="number" step="any"></div>
+        </div>
+        <div class="field"><label>აღწერა</label><textarea id="lk_desc" style="font-family:inherit;font-size:14px"></textarea></div>
+        <div class="field"><label>თევზები (JSON: name_ka + catch_difficulty 1–5)</label><textarea id="lk_fish" placeholder='[{"name_ka":"კობრი","catch_difficulty":2}]'></textarea></div>
+        <button class="btn btn-primary" style="width:auto" onclick="saveLake()">💾 შენახვა</button>
+        <button class="btn btn-small" onclick="hideLakeForm()">გაუქმება</button>
+      </div>
+      <div class="tablewrap"><table id="lakesTable"></table></div>
+    </section>
+
+    <section id="tab-users" style="display:none">
+      <h2>👤 მომხმარებლები</h2>
+      <div class="tablewrap"><table id="usersTable"></table></div>
+    </section>
+
+    <section id="tab-photos" style="display:none">
+      <h2>📸 ატვირთული ფოტოები</h2>
+      <div class="grid" id="photosGrid"></div>
+    </section>
+
+    <section id="tab-comments" style="display:none">
+      <h2>💬 კომენტარები</h2>
+      <div id="commentsList"></div>
+    </section>
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const TOKEN_KEY = 'fm_admin_token';
+let token = localStorage.getItem(TOKEN_KEY) || '';
+let editingLakeId = null; // null = creating a new lake
+
+// ── helpers ──────────────────────────────────────────────────
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, (c) =>
+    ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+}
+function toast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = isError ? 'error' : '';
+  t.style.display = 'block';
+  clearTimeout(t._h);
+  t._h = setTimeout(() => (t.style.display = 'none'), 2600);
+}
+async function api(path, opts = {}) {
+  const res = await fetch('/api' + path, {
+    ...opts,
+    headers: {
+      ...(opts.body ? { 'Content-Type': 'application/json' } : {}),
+      Authorization: 'Bearer ' + token,
+      ...(opts.headers || {}),
+    },
+  });
+  const data = await res.json().catch(() => null);
+  if (!res.ok) {
+    const m = data && data.message;
+    throw new Error(Array.isArray(m) ? m.join(', ') : (m || ('შეცდომა ' + res.status)));
+  }
+  return data;
+}
+function fmtDate(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('ka-GE') + ' ' + d.toLocaleTimeString('ka-GE', { hour: '2-digit', minute: '2-digit' });
+}
+
+// ── auth ─────────────────────────────────────────────────────
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPass').value;
+  const errEl = document.getElementById('loginErr');
+  errEl.textContent = '';
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'შესვლა ვერ მოხერხდა');
+    token = data.token;
+    // Verify the account actually has admin rights.
+    await api('/admin/stats');
+    localStorage.setItem(TOKEN_KEY, token);
+    document.getElementById('whoami').textContent = data.user.avatar + ' ' + data.user.username;
+    enterApp();
+  } catch (e) {
+    token = '';
+    errEl.textContent = '⚠️ ' + e.message;
+  }
+}
+function logout() {
+  localStorage.removeItem(TOKEN_KEY);
+  location.reload();
+}
+function enterApp() {
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  show('dash');
+}
+document.getElementById('loginPass').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') doLogin();
+});
+
+// ── tabs ─────────────────────────────────────────────────────
+const loaders = { dash: loadDash, lakes: loadLakes, users: loadUsers, photos: loadPhotos, comments: loadComments };
+function show(tab) {
+  document.querySelectorAll('nav button').forEach((b) => b.classList.toggle('active', b.dataset.tab === tab));
+  ['dash', 'lakes', 'users', 'photos', 'comments'].forEach((t) => {
+    document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none';
+  });
+  loaders[tab]().catch((e) => toast(e.message, true));
+}
+
+// ── dashboard ────────────────────────────────────────────────
+async function loadDash() {
+  const s = await api('/admin/stats');
+  const cards = [
+    ['👤', s.users, 'მომხმარებელი'], ['📸', s.catches, 'ფოტო'],
+    ['💬', s.comments, 'კომენტარი'], ['🗺️', s.lakes, 'ტბა'],
+    ['🆕', s.usersWeek, 'ახალი (7 დღე)'], ['🎣', s.catchesWeek, 'ფოტო (7 დღე)'],
+  ];
+  document.getElementById('statCards').innerHTML = cards
+    .map(([e, v, l]) => `<div class="stat grad"><div class="v">${e} ${v}</div><div class="l">${l}</div></div>`)
+    .join('');
+  document.getElementById('recentUsers').innerHTML =
+    '<tr><th>მომხმარებელი</th><th>რეგისტრაცია</th></tr>' +
+    s.recentUsers.map((u) => `<tr><td>${esc(u.avatar)} ${esc(u.username)}</td><td class="muted">${fmtDate(u.createdAt)}</td></tr>`).join('');
+}
+
+// ── lakes ────────────────────────────────────────────────────
+let lakesCache = [];
+async function loadLakes() {
+  lakesCache = await api('/lakes');
+  document.getElementById('lakesTable').innerHTML =
+    '<tr><th>ID</th><th>სახელი</th><th>რეგიონი</th><th>ტიპი</th><th>თევზი</th><th></th></tr>' +
+    lakesCache.map((l) => `<tr>
+      <td>${l.id}</td><td>${esc(l.name_ka)}</td><td>${esc(l.region)}</td><td>${esc(l.type)}</td>
+      <td>${l.fish_species.length}</td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-small" onclick="editLake(${l.id})">✏️</button>
+        <button class="btn btn-danger" onclick="removeLake(${l.id}, '${esc(l.name_ka)}')">🗑️</button>
+      </td></tr>`).join('');
+}
+function newLake() {
+  editingLakeId = null;
+  document.getElementById('lakeFormTitle').textContent = '➕ ახალი ტბა';
+  const maxId = lakesCache.reduce((m, l) => Math.max(m, l.id), 0);
+  fillLakeForm({ id: maxId + 1, name_ka: '', name_en: '', type: 'lake', region: '',
+    coordinates: { latitude: '', longitude: '' }, description: '', fish_species: [] });
+  document.getElementById('lk_id').disabled = false;
+  document.getElementById('lakeForm').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function editLake(id) {
+  const l = lakesCache.find((x) => x.id === id);
+  if (!l) return;
+  editingLakeId = id;
+  document.getElementById('lakeFormTitle').textContent = '✏️ ' + l.name_ka;
+  fillLakeForm(l);
+  document.getElementById('lk_id').disabled = true;
+  document.getElementById('lakeForm').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function fillLakeForm(l) {
+  document.getElementById('lk_id').value = l.id;
+  document.getElementById('lk_name_ka').value = l.name_ka;
+  document.getElementById('lk_name_en').value = l.name_en;
+  document.getElementById('lk_type').value = l.type;
+  document.getElementById('lk_region').value = l.region;
+  document.getElementById('lk_lat').value = l.coordinates.latitude;
+  document.getElementById('lk_lng').value = l.coordinates.longitude;
+  document.getElementById('lk_area').value = l.area_km2 ?? '';
+  document.getElementById('lk_depth').value = l.max_depth_meters ?? '';
+  document.getElementById('lk_desc').value = l.description ?? '';
+  document.getElementById('lk_fish').value = JSON.stringify(l.fish_species, null, 2);
+}
+function hideLakeForm() { document.getElementById('lakeForm').style.display = 'none'; }
+async function saveLake() {
+  let fish;
+  try { fish = JSON.parse(document.getElementById('lk_fish').value || '[]'); }
+  catch { return toast('თევზების JSON არასწორია', true); }
+  const num = (id) => { const v = document.getElementById(id).value; return v === '' ? undefined : Number(v); };
+  const body = {
+    name_ka: document.getElementById('lk_name_ka').value.trim(),
+    name_en: document.getElementById('lk_name_en').value.trim(),
+    type: document.getElementById('lk_type').value,
+    region: document.getElementById('lk_region').value.trim(),
+    latitude: num('lk_lat'), longitude: num('lk_lng'),
+    area_km2: num('lk_area'), max_depth_meters: num('lk_depth'),
+    description: document.getElementById('lk_desc').value.trim() || undefined,
+    fish_species: fish,
+  };
+  Object.keys(body).forEach((k) => body[k] === undefined && delete body[k]);
+  try {
+    if (editingLakeId === null) {
+      await api('/admin/lakes', { method: 'POST', body: JSON.stringify({ id: num('lk_id'), ...body }) });
+      toast('ტბა დაემატა ✅');
+    } else {
+      await api('/admin/lakes/' + editingLakeId, { method: 'PATCH', body: JSON.stringify(body) });
+      toast('შენახულია ✅');
+    }
+    hideLakeForm();
+    loadLakes();
+  } catch (e) { toast(e.message, true); }
+}
+async function removeLake(id, name) {
+  if (!confirm(`წავშალო "${name}"? წაიშლება მისი ფოტოები და კომენტარებიც!`)) return;
+  try { await api('/admin/lakes/' + id, { method: 'DELETE' }); toast('წაიშალა'); loadLakes(); }
+  catch (e) { toast(e.message, true); }
+}
+
+// ── users ────────────────────────────────────────────────────
+async function loadUsers() {
+  const users = await api('/admin/users');
+  document.getElementById('usersTable').innerHTML =
+    '<tr><th>მომხმარებელი</th><th>ელ-ფოსტა</th><th>📸</th><th>💬</th><th>რეგისტრაცია</th><th></th></tr>' +
+    users.map((u) => `<tr>
+      <td>${esc(u.avatar)} ${esc(u.username)} ${u.isAdmin ? '👑' : ''}</td>
+      <td class="muted">${esc(u.email)}</td>
+      <td>${u.photoCount}</td><td>${u.commentCount}</td>
+      <td class="muted">${fmtDate(u.createdAt)}</td>
+      <td>${u.isAdmin ? '' : `<button class="btn btn-danger" onclick="removeUser('${u.id}', '${esc(u.username)}')">🗑️ წაშლა</button>`}</td>
+    </tr>`).join('');
+}
+async function removeUser(id, name) {
+  if (!confirm(`წავშალო მომხმარებელი "${name}"? წაიშლება მისი ყველა ფოტო და კომენტარი!`)) return;
+  try { await api('/admin/users/' + id, { method: 'DELETE' }); toast('წაიშალა'); loadUsers(); }
+  catch (e) { toast(e.message, true); }
+}
+
+// ── photos ───────────────────────────────────────────────────
+async function loadPhotos() {
+  const catches = await api('/admin/catches');
+  document.getElementById('photosGrid').innerHTML = catches.length === 0
+    ? '<p class="muted">ფოტოები არ არის</p>'
+    : catches.map((c) => `<div class="photo">
+        <img src="${esc(c.imageUri)}" loading="lazy" onclick="window.open('${esc(c.imageUri)}')">
+        <div class="meta">
+          <div>👤 ${esc(c.username)}</div>
+          <div class="muted">📍 ${esc(c.lakeName)} · ${fmtDate(c.createdAt)}</div>
+          <div style="margin-top:6px;text-align:right">
+            <button class="btn btn-danger" onclick="removePhoto('${c.id}')">🗑️ წაშლა</button>
+          </div>
+        </div>
+      </div>`).join('');
+}
+async function removePhoto(id) {
+  if (!confirm('წავშალო ეს ფოტო?')) return;
+  try { await api('/admin/catches/' + id, { method: 'DELETE' }); toast('წაიშალა'); loadPhotos(); }
+  catch (e) { toast(e.message, true); }
+}
+
+// ── comments ─────────────────────────────────────────────────
+async function loadComments() {
+  const comments = await api('/admin/comments');
+  document.getElementById('commentsList').innerHTML = comments.length === 0
+    ? '<p class="muted">კომენტარები არ არის</p>'
+    : comments.map((c) => `<div class="comment">
+        <div class="head"><span>👤 ${esc(c.username)} · 📍 ${esc(c.lakeName)}</span><span class="muted">${fmtDate(c.createdAt)}</span></div>
+        <div class="text">${esc(c.text)}</div>
+        <div class="actions"><button class="btn btn-danger" onclick="removeComment('${c.id}')">🗑️ წაშლა</button></div>
+      </div>`).join('');
+}
+async function removeComment(id) {
+  if (!confirm('წავშალო ეს კომენტარი?')) return;
+  try { await api('/admin/comments/' + id, { method: 'DELETE' }); toast('წაიშალა'); loadComments(); }
+  catch (e) { toast(e.message, true); }
+}
+
+// ── boot: restore a saved session if the token still has admin access ──
+if (token) {
+  api('/admin/stats')
+    .then(() => { document.getElementById('whoami').textContent = ''; enterApp(); })
+    .catch(() => localStorage.removeItem(TOKEN_KEY));
+}
+</script>
+</body>
+</html>

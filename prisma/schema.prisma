@@ -19,6 +19,7 @@ model User {
   email        String   @unique
   password     String // bcrypt hash — never returned to clients
   avatar       String   @default("🎣") // emoji string, e.g. "🎣"
+  isAdmin      Boolean  @default(false) @map("is_admin") // grants access to /admin panel
   totalCatches Int      @default(0) @map("total_catches")
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")

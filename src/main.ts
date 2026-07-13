@@ -10,7 +10,8 @@ async function bootstrap() {
   const config = app.get(ConfigService);
 
   // All routes are namespaced under /api (e.g. /api/auth/login).
-  app.setGlobalPrefix('api', { exclude: ['uploads/(.*)'] });
+  // "admin" (exact) stays un-prefixed so the panel lives at /admin.
+  app.setGlobalPrefix('api', { exclude: ['uploads/(.*)', 'admin'] });
 
   // Strip unknown properties and validate DTOs everywhere.
   app.useGlobalPipes(
