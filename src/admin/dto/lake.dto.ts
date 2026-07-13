@@ -27,6 +27,12 @@ export class FishSpeciesInputDto {
   @Min(1)
   @Max(5)
   catch_difficulty: number;
+
+  // Optional photo of the species, uploaded via POST /api/admin/fish-image.
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  image_uri?: string;
 }
 
 export class CreateLakeDto {

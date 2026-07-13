@@ -5,6 +5,8 @@ export interface FishSpeciesDto {
   name_en?: string;
   // How rare / hard to catch: 1 = common/easy … 5 = rare/hard.
   catch_difficulty: number;
+  // Optional admin-uploaded photo of the species (absolute /uploads/ URL).
+  image_uri?: string;
 }
 
 // Matches the app's `Lake` type (types/fishing.ts).

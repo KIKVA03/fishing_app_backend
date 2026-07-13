@@ -1,4 +1,5 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import * as fs from 'fs';
 import { join } from 'path';
 import { UPLOADS_DIR } from '../catches/upload.config';
@@ -10,7 +11,19 @@ const DAY_MS = 86400000;
 
 @Injectable()
 export class AdminService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly config: ConfigService,
+  ) {}
+
+  // Absolute URL for a file multer just wrote into UPLOADS_DIR (same scheme as catches).
+  buildUploadUrl(filename: string): string {
+    const base = (this.config.get<string>('PUBLIC_URL') ?? 'http://localhost:4000').replace(
+      /\/+$/,
+      '',
+    );
+    return `${base}/uploads/${filename}`;
+  }
 
   // ── Dashboard ────────────────────────────────────────────────
   async stats() {

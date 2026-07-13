@@ -72,6 +72,13 @@
   .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
   textarea { min-height: 90px; font-family: ui-monospace, Consolas, monospace; font-size: 12px; }
+  /* ── fish species editor ── */
+  .fishrow { display: flex; gap: 8px; align-items: center; background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+  .fishrow img, .fishrow .noimg { width: 52px; height: 52px; border-radius: 10px; object-fit: cover; flex-shrink: 0; }
+  .fishrow .noimg { background: #1e293b; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+  .fishrow input, .fishrow select { width: auto; flex: 1; min-width: 110px; padding: 8px 10px; font-size: 13px; }
+  .fishrow select { flex: 0 0 130px; }
+  .fishrow .fbtns { display: flex; gap: 6px; flex-shrink: 0; }
   #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--teal); color: #fff; padding: 12px 22px; border-radius: 999px; font-size: 14px; font-weight: 700; display: none; z-index: 50; }
   #toast.error { background: var(--danger); }
   @media (max-width: 600px) { .row2, .row3 { grid-template-columns: 1fr; } }
@@ -135,7 +142,10 @@
           <div class="field"><label>მაქს. სიღრმე მ (არასავალდ.)</label><input id="lk_depth" type="number" step="any"></div>
         </div>
         <div class="field"><label>აღწერა</label><textarea id="lk_desc" style="font-family:inherit;font-size:14px"></textarea></div>
-        <div class="field"><label>თევზები (JSON: name_ka + catch_difficulty 1–5)</label><textarea id="lk_fish" placeholder='[{"name_ka":"კობრი","catch_difficulty":2}]'></textarea></div>
+        <div class="field">
+          <label>🐟 თევზები <button class="btn btn-small" style="margin-left:6px" onclick="addFish()">+ თევზის დამატება</button></label>
+          <div id="fishRows"></div>
+        </div>
         <button class="btn btn-primary" style="width:auto" onclick="saveLake()">💾 შენახვა</button>
         <button class="btn btn-small" onclick="hideLakeForm()">გაუქმება</button>
       </div>
@@ -309,13 +319,68 @@ function fillLakeForm(l) {
   document.getElementById('lk_area').value = l.area_km2 ?? '';
   document.getElementById('lk_depth').value = l.max_depth_meters ?? '';
   document.getElementById('lk_desc').value = l.description ?? '';
-  document.getElementById('lk_fish').value = JSON.stringify(l.fish_species, null, 2);
+  fishList = (l.fish_species || []).map((f) => ({ ...f }));
+  renderFish();
+}
+
+// ── fish species editor ──────────────────────────────────────
+let fishList = [];
+const DIFF_LABELS = ['1 ★ ხშირი', '2 ★★', '3 ★★★ საშუალო', '4 ★★★★', '5 ★★★★★ იშვიათი'];
+function renderFish() {
+  document.getElementById('fishRows').innerHTML = fishList.length === 0
+    ? '<p class="muted" style="padding:6px 2px">თევზები არ არის — დაამატე ღილაკით ⤴</p>'
+    : fishList.map((f, i) => `<div class="fishrow">
+        ${f.image_uri
+          ? `<img src="${esc(f.image_uri)}" onclick="window.open('${esc(f.image_uri)}')">`
+          : '<div class="noimg">🐟</div>'}
+        <input placeholder="სახელი (ქართ.)" value="${esc(f.name_ka || '')}" oninput="fishList[${i}].name_ka=this.value">
+        <input placeholder="ინგლ. (არასავალდ.)" value="${esc(f.name_en || '')}" oninput="fishList[${i}].name_en=this.value">
+        <select onchange="fishList[${i}].catch_difficulty=Number(this.value)">
+          ${DIFF_LABELS.map((l, d) => `<option value="${d + 1}" ${f.catch_difficulty === d + 1 ? 'selected' : ''}>${l}</option>`).join('')}
+        </select>
+        <div class="fbtns">
+          <button class="btn btn-small" onclick="this.nextElementSibling.click()">📷 ${f.image_uri ? 'შეცვლა' : 'ფოტო'}</button>
+          <input type="file" accept="image/*" style="display:none" onchange="uploadFishImg(${i}, this)">
+          ${f.image_uri ? `<button class="btn btn-small" onclick="fishList[${i}].image_uri=undefined;renderFish()">✕ ფოტო</button>` : ''}
+          <button class="btn btn-danger" onclick="fishList.splice(${i},1);renderFish()">🗑️</button>
+        </div>
+      </div>`).join('');
+}
+function addFish() {
+  fishList.push({ name_ka: '', catch_difficulty: 3 });
+  renderFish();
+}
+async function uploadFishImg(i, input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const fd = new FormData();
+  fd.append('image', file);
+  try {
+    toast('იტვირთება...');
+    const res = await fetch('/api/admin/fish-image', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + token },
+      body: fd,
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) throw new Error((data && data.message) || 'ატვირთვა ვერ მოხერხდა');
+    fishList[i].image_uri = data.url;
+    renderFish();
+    toast('ფოტო აიტვირთა ✅');
+  } catch (e) { toast(e.message, true); }
 }
 function hideLakeForm() { document.getElementById('lakeForm').style.display = 'none'; }
 async function saveLake() {
-  let fish;
-  try { fish = JSON.parse(document.getElementById('lk_fish').value || '[]'); }
-  catch { return toast('თევზების JSON არასწორია', true); }
+  if (fishList.some((f) => !String(f.name_ka || '').trim())) {
+    return toast('ყველა თევზს სახელი სჭირდება', true);
+  }
+  // Strip empty optional fields so DTO validation passes.
+  const fish = fishList.map((f) => ({
+    name_ka: f.name_ka.trim(),
+    ...(f.name_en && f.name_en.trim() ? { name_en: f.name_en.trim() } : {}),
+    catch_difficulty: f.catch_difficulty || 3,
+    ...(f.image_uri ? { image_uri: f.image_uri } : {}),
+  }));
   const num = (id) => { const v = document.getElementById(id).value; return v === '' ? undefined : Number(v); };
   const body = {
     name_ka: document.getElementById('lk_name_ka').value.trim(),

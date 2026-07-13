@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -8,13 +9,17 @@ import {
   Patch,
   Post,
   Res,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { User } from '@prisma/client';
 import { Response } from 'express';
 import { join } from 'path';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { catchUploadOptions } from '../catches/upload.config';
 import { AdminGuard } from './admin.guard';
 import { AdminService } from './admin.service';
 import { CreateLakeDto, UpdateLakeDto } from './dto/lake.dto';
@@ -58,6 +63,16 @@ export class AdminController {
   @Delete('comments/:id')
   deleteComment(@Param('id') id: string) {
     return this.adminService.deleteComment(id);
+  }
+
+  // Uploads a fish-species photo; returns { url } to put into fish_species[].image_uri.
+  @Post('fish-image')
+  @UseInterceptors(FileInterceptor('image', catchUploadOptions))
+  uploadFishImage(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('ფოტო აუცილებელია');
+    }
+    return { url: this.adminService.buildUploadUrl(file.filename) };
   }
 
   @Post('lakes')
