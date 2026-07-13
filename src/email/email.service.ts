@@ -15,6 +15,9 @@ export class EmailService {
     const apiKey = this.config.get<string>('RESEND_API_KEY');
     const from =
       this.config.get<string>('EMAIL_FROM') ?? 'FishMap <onboarding@resend.dev>';
+    // Replies to verification emails land in the project inbox.
+    const replyTo =
+      this.config.get<string>('EMAIL_REPLY_TO') ?? 'fishmapgeorgia@gmail.com';
 
     if (!apiKey) {
       // No key configured — log the code so local dev still works without email.
@@ -33,6 +36,7 @@ export class EmailService {
       body: JSON.stringify({
         from,
         to,
+        reply_to: replyTo,
         subject: 'ფიშმეპ — დადასტურების კოდი',
         html: this.buildHtml(code),
       }),
