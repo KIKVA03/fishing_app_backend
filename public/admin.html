@@ -111,6 +111,7 @@
     <button data-tab="users" onclick="show('users')">👤 მომხმარებლები</button>
     <button data-tab="photos" onclick="show('photos')">📸 ფოტოები</button>
     <button data-tab="comments" onclick="show('comments')">💬 კომენტარები</button>
+    <button data-tab="baits" onclick="show('baits')">🐟 სატყუარები</button>
   </nav>
   <main>
     <section id="tab-dash">
@@ -165,6 +166,25 @@
     <section id="tab-comments" style="display:none">
       <h2>💬 კომენტარები</h2>
       <div id="commentsList"></div>
+    </section>
+
+    <section id="tab-baits" style="display:none">
+      <h2>🐟 თევზების სატყუარები <button class="btn btn-small" style="margin-left:8px" onclick="newFishInfo()">+ ახალი თევზი</button></h2>
+      <p class="muted" style="margin-bottom:12px">ეს ინფო აპში თევზზე დაჭერისას ჩანს — სატყუარების სია, ფოტოები და რჩევა.</p>
+      <div class="lakeform" id="infoForm">
+        <h2 id="infoFormTitle" style="margin-top:0">რედაქტირება</h2>
+        <div class="row2">
+          <div class="field"><label>თევზის სახელი (ზუსტად როგორც ტბებშია)</label><input id="fi_name"></div>
+        </div>
+        <div class="field"><label>💡 რჩევა (არასავალდ.)</label><textarea id="fi_tip" style="font-family:inherit;font-size:14px;min-height:60px"></textarea></div>
+        <div class="field">
+          <label>🎣 სატყუარები <button class="btn btn-small" style="margin-left:6px" onclick="addBait()">+ სატყუარის დამატება</button></label>
+          <div id="baitRows"></div>
+        </div>
+        <button class="btn btn-primary" style="width:auto" onclick="saveFishInfo()">💾 შენახვა</button>
+        <button class="btn btn-small" onclick="hideInfoForm()">გაუქმება</button>
+      </div>
+      <div class="tablewrap"><table id="infoTable"></table></div>
     </section>
   </main>
 </div>
@@ -249,10 +269,10 @@ document.getElementById('loginPass').addEventListener('keydown', (e) => {
 });
 
 // ── tabs ─────────────────────────────────────────────────────
-const loaders = { dash: loadDash, lakes: loadLakes, users: loadUsers, photos: loadPhotos, comments: loadComments };
+const loaders = { dash: loadDash, lakes: loadLakes, users: loadUsers, photos: loadPhotos, comments: loadComments, baits: loadFishInfo };
 function show(tab) {
   document.querySelectorAll('nav button').forEach((b) => b.classList.toggle('active', b.dataset.tab === tab));
-  ['dash', 'lakes', 'users', 'photos', 'comments'].forEach((t) => {
+  ['dash', 'lakes', 'users', 'photos', 'comments', 'baits'].forEach((t) => {
     document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none';
   });
   loaders[tab]().catch((e) => toast(e.message, true));
@@ -467,6 +487,120 @@ async function removeComment(id) {
   if (!confirm('წავშალო ეს კომენტარი?')) return;
   try { await api('/admin/comments/' + id, { method: 'DELETE' }); toast('წაიშალა'); loadComments(); }
   catch (e) { toast(e.message, true); }
+}
+
+// ── fish bait info ───────────────────────────────────────────
+let infoList = [];
+let baitRows = [];
+let editingFishName = null; // null = creating a new entry
+async function loadFishInfo() {
+  infoList = await api('/fish-info');
+  document.getElementById('infoTable').innerHTML =
+    '<tr><th>თევზი</th><th>სატყუარები</th><th>რჩევა</th><th></th></tr>' +
+    (infoList.length === 0
+      ? '<tr><td colspan="4" class="muted">ჩანაწერები არ არის</td></tr>'
+      : infoList.map((f) => `<tr>
+          <td style="font-weight:700">${esc(f.name)}</td>
+          <td>${f.baits.map((b) => `${b.image_uri ? '🖼️' : ''}${esc(b.name)}`).join(', ') || '—'}</td>
+          <td class="muted" style="max-width:260px">${esc(f.tip || '')}</td>
+          <td style="white-space:nowrap">
+            <button class="btn btn-small" onclick="editFishInfo('${esc(f.name)}')">✏️</button>
+            <button class="btn btn-danger" onclick="removeFishInfo('${esc(f.name)}')">🗑️</button>
+          </td></tr>`).join(''));
+}
+function renderBaits() {
+  document.getElementById('baitRows').innerHTML = baitRows.length === 0
+    ? '<p class="muted" style="padding:6px 2px">სატყუარები არ არის — დაამატე ღილაკით ⤴</p>'
+    : baitRows.map((b, i) => `<div class="fishrow">
+        ${b.image_uri
+          ? `<img src="${esc(b.image_uri)}" onclick="window.open('${esc(b.image_uri)}')">`
+          : '<div class="noimg">🎣</div>'}
+        <input placeholder="სატყუარის სახელი" value="${esc(b.name || '')}" oninput="baitRows[${i}].name=this.value">
+        <div class="fbtns">
+          <button class="btn btn-small" onclick="this.nextElementSibling.click()">📷 ${b.image_uri ? 'შეცვლა' : 'ფოტო'}</button>
+          <input type="file" accept="image/*" style="display:none" onchange="uploadBaitImg(${i}, this)">
+          ${b.image_uri ? `<button class="btn btn-small" onclick="baitRows[${i}].image_uri=undefined;renderBaits()">✕ ფოტო</button>` : ''}
+          <button class="btn btn-danger" onclick="baitRows.splice(${i},1);renderBaits()">🗑️</button>
+        </div>
+      </div>`).join('');
+}
+function addBait() {
+  baitRows.push({ name: '' });
+  renderBaits();
+}
+async function uploadBaitImg(i, input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const fd = new FormData();
+  fd.append('image', file);
+  try {
+    toast('იტვირთება...');
+    const res = await fetch('/api/admin/fish-image', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + token },
+      body: fd,
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) throw new Error((data && data.message) || 'ატვირთვა ვერ მოხერხდა');
+    baitRows[i].image_uri = data.url;
+    renderBaits();
+    toast('ფოტო აიტვირთა ✅');
+  } catch (e) { toast(e.message, true); }
+}
+function newFishInfo() {
+  editingFishName = null;
+  document.getElementById('infoFormTitle').textContent = '➕ ახალი თევზი';
+  document.getElementById('fi_name').value = '';
+  document.getElementById('fi_name').disabled = false;
+  document.getElementById('fi_tip').value = '';
+  baitRows = [];
+  renderBaits();
+  document.getElementById('infoForm').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function editFishInfo(name) {
+  const f = infoList.find((x) => x.name === name);
+  if (!f) return;
+  editingFishName = name;
+  document.getElementById('infoFormTitle').textContent = '✏️ ' + name;
+  document.getElementById('fi_name').value = f.name;
+  document.getElementById('fi_name').disabled = true;
+  document.getElementById('fi_tip').value = f.tip || '';
+  baitRows = f.baits.map((b) => ({ ...b }));
+  renderBaits();
+  document.getElementById('infoForm').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function hideInfoForm() { document.getElementById('infoForm').style.display = 'none'; }
+async function saveFishInfo() {
+  const name = document.getElementById('fi_name').value.trim();
+  if (!name) return toast('თევზის სახელი სავალდებულოა', true);
+  if (baitRows.some((b) => !String(b.name || '').trim())) {
+    return toast('ყველა სატყუარას სახელი სჭირდება', true);
+  }
+  const body = {
+    name,
+    ...(document.getElementById('fi_tip').value.trim()
+      ? { tip: document.getElementById('fi_tip').value.trim() } : {}),
+    baits: baitRows.map((b) => ({
+      name: b.name.trim(),
+      ...(b.image_uri ? { image_uri: b.image_uri } : {}),
+    })),
+  };
+  try {
+    await api('/admin/fish-info', { method: 'POST', body: JSON.stringify(body) });
+    toast('შენახულია ✅');
+    hideInfoForm();
+    loadFishInfo();
+  } catch (e) { toast(e.message, true); }
+}
+async function removeFishInfo(name) {
+  if (!confirm(`წავშალო "${name}"-ის სატყუარების ინფო?`)) return;
+  try {
+    await api('/admin/fish-info/' + encodeURIComponent(name), { method: 'DELETE' });
+    toast('წაიშალა');
+    loadFishInfo();
+  } catch (e) { toast(e.message, true); }
 }
 
 // ── boot: restore a saved session if the token still has admin access ──

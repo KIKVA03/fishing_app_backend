@@ -47,6 +47,16 @@ model EmailVerification {
   @@map("email_verifications")
 }
 
+// Per-species bait knowledge shown in the app's fish-info modal. One row per
+// fish (keyed by its Georgian name); managed from the admin panel.
+model FishInfo {
+  name  String  @id // Georgian species name, e.g. "კობრი"
+  tip   String? // one short line of advice
+  baits Json // array of { name, image_uri? }
+
+  @@map("fish_info")
+}
+
 model Lake {
   id              Int     @id // matches the ids used by the app's lakesData.json
   nameKa          String  @map("name_ka")

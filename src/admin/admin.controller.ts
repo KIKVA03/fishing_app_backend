@@ -20,6 +20,8 @@ import { join } from 'path';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { catchUploadOptions } from '../catches/upload.config';
+import { UpsertFishInfoDto } from '../fish-info/dto/fish-info.dto';
+import { FishInfoService } from '../fish-info/fish-info.service';
 import { AdminGuard } from './admin.guard';
 import { AdminService } from './admin.service';
 import { CreateLakeDto, UpdateLakeDto } from './dto/lake.dto';
@@ -28,7 +30,10 @@ import { CreateLakeDto, UpdateLakeDto } from './dto/lake.dto';
 @Controller('admin')
 @UseGuards(JwtAuthGuard, AdminGuard)
 export class AdminController {
-  constructor(private readonly adminService: AdminService) {}
+  constructor(
+    private readonly adminService: AdminService,
+    private readonly fishInfoService: FishInfoService,
+  ) {}
 
   @Get('stats')
   stats() {
@@ -73,6 +78,17 @@ export class AdminController {
       throw new BadRequestException('ფოტო აუცილებელია');
     }
     return { url: this.adminService.buildUploadUrl(file.filename) };
+  }
+
+  // Creates or replaces the bait info for one fish species.
+  @Post('fish-info')
+  upsertFishInfo(@Body() dto: UpsertFishInfoDto) {
+    return this.fishInfoService.upsert(dto);
+  }
+
+  @Delete('fish-info/:name')
+  deleteFishInfo(@Param('name') name: string) {
+    return this.fishInfoService.remove(name);
   }
 
   @Post('lakes')

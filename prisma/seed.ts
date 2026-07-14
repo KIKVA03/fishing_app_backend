@@ -57,6 +57,25 @@ async function main() {
   }
 
   console.log('✅ Lakes seeded.');
+
+  // Baseline bait knowledge per fish (edited later from the admin panel).
+  // upsert-create only: never overwrite admin edits on re-seed.
+  const fishInfoPath = path.join(__dirname, 'fishInfoData.json');
+  const fishInfo = JSON.parse(fs.readFileSync(fishInfoPath, 'utf-8')) as {
+    name: string;
+    tip?: string;
+    baits: object[];
+  }[];
+  let created = 0;
+  for (const info of fishInfo) {
+    const existing = await prisma.fishInfo.findUnique({ where: { name: info.name } });
+    if (existing) continue;
+    await prisma.fishInfo.create({
+      data: { name: info.name, tip: info.tip ?? null, baits: info.baits },
+    });
+    created += 1;
+  }
+  console.log(`✅ Fish info seeded (${created} new, ${fishInfo.length - created} kept).`);
 }
 
 main()
