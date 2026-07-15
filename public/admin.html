@@ -112,6 +112,7 @@
     <button data-tab="photos" onclick="show('photos')">📸 ფოტოები</button>
     <button data-tab="comments" onclick="show('comments')">💬 კომენტარები</button>
     <button data-tab="baits" onclick="show('baits')">🐟 სატყუარები</button>
+    <button data-tab="spots" onclick="show('spots')">📍 პინები</button>
   </nav>
   <main>
     <section id="tab-dash">
@@ -185,6 +186,12 @@
         <button class="btn btn-small" onclick="hideInfoForm()">გაუქმება</button>
       </div>
       <div class="tablewrap"><table id="infoTable"></table></div>
+    </section>
+
+    <section id="tab-spots" style="display:none">
+      <h2>📍 მომხმარებლების პინები</h2>
+      <p class="muted" style="margin-bottom:12px">🌍 = გამოქვეყნებული (ყველას უჩანს), 🔒 = პრივატული (მხოლოდ ავტორს).</p>
+      <div class="tablewrap"><table id="spotsTable"></table></div>
     </section>
   </main>
 </div>
@@ -269,10 +276,10 @@ document.getElementById('loginPass').addEventListener('keydown', (e) => {
 });
 
 // ── tabs ─────────────────────────────────────────────────────
-const loaders = { dash: loadDash, lakes: loadLakes, users: loadUsers, photos: loadPhotos, comments: loadComments, baits: loadFishInfo };
+const loaders = { dash: loadDash, lakes: loadLakes, users: loadUsers, photos: loadPhotos, comments: loadComments, baits: loadFishInfo, spots: loadSpots };
 function show(tab) {
   document.querySelectorAll('nav button').forEach((b) => b.classList.toggle('active', b.dataset.tab === tab));
-  ['dash', 'lakes', 'users', 'photos', 'comments', 'baits'].forEach((t) => {
+  ['dash', 'lakes', 'users', 'photos', 'comments', 'baits', 'spots'].forEach((t) => {
     document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none';
   });
   loaders[tab]().catch((e) => toast(e.message, true));
@@ -601,6 +608,29 @@ async function removeFishInfo(name) {
     toast('წაიშალა');
     loadFishInfo();
   } catch (e) { toast(e.message, true); }
+}
+
+// ── user spots (pins) ────────────────────────────────────────
+async function loadSpots() {
+  const spots = await api('/admin/spots');
+  document.getElementById('spotsTable').innerHTML =
+    '<tr><th></th><th>სახელი</th><th>ავტორი</th><th>შენიშვნა</th><th>კოორდ.</th><th>თარიღი</th><th></th></tr>' +
+    (spots.length === 0
+      ? '<tr><td colspan="7" class="muted">პინები არ არის</td></tr>'
+      : spots.map((s) => `<tr>
+          <td>${s.isPublic ? '🌍' : '🔒'}</td>
+          <td style="font-weight:700">${esc(s.title)}</td>
+          <td>${esc(s.avatar)} ${esc(s.username)}</td>
+          <td class="muted" style="max-width:220px">${esc(s.note || '')}</td>
+          <td class="muted"><a href="https://maps.google.com/?q=${s.latitude},${s.longitude}" target="_blank" style="color:#5eead4">${s.latitude.toFixed(4)}, ${s.longitude.toFixed(4)}</a></td>
+          <td class="muted">${fmtDate(s.createdAt)}</td>
+          <td><button class="btn btn-danger" onclick="removeSpot('${s.id}', '${esc(s.title)}')">🗑️</button></td>
+        </tr>`).join(''));
+}
+async function removeSpot(id, title) {
+  if (!confirm(`წავშალო პინი "${title}"?`)) return;
+  try { await api('/admin/spots/' + id, { method: 'DELETE' }); toast('წაიშალა'); loadSpots(); }
+  catch (e) { toast(e.message, true); }
 }
 
 // ── boot: restore a saved session if the token still has admin access ──

@@ -26,8 +26,28 @@ model User {
 
   catches  Catch[]
   comments Comment[]
+  spots    Spot[]
 
   @@map("users")
+}
+
+// User-placed fishing-spot pin. Private by default; the owner can publish it
+// so every angler sees it on the map (admin can remove any published pin).
+model Spot {
+  id        String   @id @default(cuid())
+  title     String
+  note      String?
+  latitude  Float
+  longitude Float
+  isPublic  Boolean  @default(false) @map("is_public")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isPublic])
+  @@map("spots")
 }
 
 // Holds a pending registration until the user proves they own the email by

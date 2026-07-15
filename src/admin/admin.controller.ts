@@ -22,6 +22,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { catchUploadOptions } from '../catches/upload.config';
 import { UpsertFishInfoDto } from '../fish-info/dto/fish-info.dto';
 import { FishInfoService } from '../fish-info/fish-info.service';
+import { SpotsService } from '../spots/spots.service';
 import { AdminGuard } from './admin.guard';
 import { AdminService } from './admin.service';
 import { CreateLakeDto, UpdateLakeDto } from './dto/lake.dto';
@@ -33,7 +34,18 @@ export class AdminController {
   constructor(
     private readonly adminService: AdminService,
     private readonly fishInfoService: FishInfoService,
+    private readonly spotsService: SpotsService,
   ) {}
+
+  @Get('spots')
+  spots() {
+    return this.spotsService.adminList();
+  }
+
+  @Delete('spots/:id')
+  deleteSpot(@Param('id') id: string) {
+    return this.spotsService.adminRemove(id);
+  }
 
   @Get('stats')
   stats() {

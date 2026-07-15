@@ -8,6 +8,7 @@ import { FishInfoModule } from './fish-info/fish-info.module';
 import { HealthModule } from './health/health.module';
 import { LakesModule } from './lakes/lakes.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { SpotsModule } from './spots/spots.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
@@ -20,6 +21,7 @@ import { UsersModule } from './users/users.module';
     CatchesModule,
     CommentsModule,
     FishInfoModule,
+    SpotsModule,
     HealthModule,
     AdminModule,
   ],
